@@ -42,8 +42,9 @@
             display: flex;
             flex-direction: column;
             color: var(--text-main);
+            opacity:0;
         }
-
+        body.loaded{opacity: 1;}
         header {
             background-color: white;
             border-bottom: 1px solid var(--border-color);
@@ -705,6 +706,8 @@
     // PROTEGER  (Si no hay token, devolver al login)
         if (!localStorage.getItem("admin_token")) {
             window.location.href = "/session/login/";
+        }else{
+            document.body.classList.add("loaded");
         }
 
         function cerrarSesion() {
