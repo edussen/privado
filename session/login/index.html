@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es" class="h-100">
+
+<head>
+    <title>Inicia sesión con tu Numart ID</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="https://pub-03d0689f896f4c1b96c0eadaaff42219.r2.dev/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;}
+        
+        .containerv2 { display: flex; height: 100vh; }
+
+        /* PANEL IZQUIERDO */
+        .login-panel { width: 550px; background: #0f0f10; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .login-panel h1 { margin-bottom: 5px; color: #fff; font-size: 28px;}
+        .subtitle { color: #aaa; margin-bottom: 30px; font-size: 14px;}
+        .form-group { display: flex; flex-direction: column; margin-bottom: 20px;}
+        label { font-size: 13px; margin-bottom: 8px; color: #fff; font-weight: 600;}
+        
+        input { background: #1c1c1e; border: 1px solid #333; border-radius: 6px; padding: 14px; color: #fff; font-size: 14px; transition: 0.3s;}
+        input:focus { outline: none; border-color: #3b82f6; }
+        
+        .primary-btn { background: #197BC2; border: none; padding: 14px; border-radius: 6px; color: white; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px;}
+        .primary-btn:hover { background: #10507e; }
+        
+        .forgot { margin: 20px 0; font-size: 13px; color: #9ca3af; text-decoration: none; text-align: center; display: block;}
+        .divider { text-align: center; margin: 20px 0; color: #666; font-size: 12px;}
+        
+        .register { margin-top: auto; font-size: 13px; color: #aaa; text-align: center;}
+        .register a { color: #197BC2; text-decoration: none; }
+
+        /* PANEL DERECHO */
+        .visual-panel { flex: 1; background: radial-gradient(circle at top, #111, #000); overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;}
+        .visual-panel img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; position: absolute; inset: 0;}
+    </style>
+</head>
+
+<body>
+    <div class="containerv2">
+        <aside class="login-panel">
+            <img style="width: 160px; height: 125px; padding-bottom: 30px; object-fit: contain;" src="https://imagenes.numart.com.co/NUMART%20TEXT%20v3.png" alt="Numart Logo">
+            
+            <h1>Iniciar sesión</h1>
+            <p class="subtitle">Acceso exclusivo al panel de administración de red.</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="dz-email"required>
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="dz-password"required>
+                </div>
+                
+                <button type="submit" id="btn-submit" class="primary-btn">CONTINUAR</button>
+            </form>
+            
+            <a href="#" class="forgot">¿Olvidaste la contraseña?</a>
+
+            <div class="divider">SEGURIDAD SRE NUMART</div>
+            
+            <p class="register">
+                Acceso restringido.
+            </p>
+        </aside>
+
+        <main class="visual-panel">
+            <img src="https://imagenes.numart.com.co/eec22090-918b-4800-9535-3d62e6635fe6.png" alt="Fondo Abstracto">
+        </main>
+    </div>
+
+    <script>
+        // PON TU URL DEL WORKER AQUÍ
+        const API_URL = "https://falling-flower-a247.mrluki4656.workers.dev";
+        
+        // Redirigir si ya está logueado
+        if (localStorage.getItem("admin_token")) {
+            window.location.href = "/"; // Asegúrate de que esta ruta apunte a tu panel admin real
+        }
+
+        const loginForm = document.getElementById("loginForm");
+        const btnSubmit = document.getElementById("btn-submit");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("dz-email").value;
+            const pass = document.getElementById("dz-password").value;
+
+            btnSubmit.innerText = "VERIFICANDO...";
+            btnSubmit.disabled = true;
+
+            try {
+                const res = await fetch(API_URL + "/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: email, contraseña: pass })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Login Exitoso: Guardamos token y datos
+                    localStorage.setItem("admin_token", data.token);
+                    localStorage.setItem("admin_info", JSON.stringify(data.userInfo));
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Acceso Concedido',
+                        text: 'Redirigiendo al panel de control...',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "/"; // Aquí va el nombre de tu archivo del Panel Admin
+                    });
+                } else {
+                    // Credenciales incorrectas
+                    Swal.fire("Acceso Denegado", data.error || "Credenciales incorrectas", "error");
+                }
+            } catch (err) {
+                Swal.fire("Error de Conexión", "No se pudo contactar con el servidor. " + err, "error");
+            } finally {
+                btnSubmit.innerText = "CONTINUAR";
+                btnSubmit.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
