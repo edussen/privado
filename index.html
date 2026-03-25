@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Demo-stración - Red Jerárquica | Numart Network</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/png" href="https://imagenes.numart.com.co/faviconTemporal.ico">
+    <style>
+        /* Exactamente la misma paleta corporativa del cliente */
+        :root {
+            --bg-page: #f4f6f8;
+            --bg-card: #ffffff;
+            --border-color: #e1e4e8;
+
+            --text-main: #24292e;
+            --text-muted: #6a737d;
+
+            --rojo-texto: #cb2431;
+            --rojo-bg: #ffeef0;
+            --rojo-borde: #fdaeb7;
+            --verde-texto: #22863a;
+            --verde-bg: #f0fff4;
+            --verde-borde: #85e89d;
+            --azul-texto: #0366d6;
+            --azul-bg: #f1f8ff;
+            --azul-borde: #c8e1ff;
+            --naranja-texto: #b08800;
+            --naranja-bg: #fffbdd;
+            --naranja-borde: #ffdf5d;
+        }
+
+        body {
+            background: var(--bg-page);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+
+        /* Cabecera principal */
+        .header {
+            background: var(--bg-card);
+            padding: 25px 30px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .status-badge {
+            background: var(--verde-bg);
+            border: 1px solid var(--verde-borde);
+            color: var(--verde-texto);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--verde-texto);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Grid de Tarjetas */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: #d1d5da;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        /* Filas de Dispositivos */
+        .device-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .device-row:last-child {
+            border: none;
+            padding-bottom: 0;
+        }
+
+        .device-name {
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        .device-name i {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        /* Toggles (Interruptores tipo Apple) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 34px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--verde-texto);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Cuando está apagado, forzamos rojo suave en el fondo */
+        input:not(:checked)+.slider {
+            background-color: var(--rojo-texto);
+            opacity: 0.9;
+        }
+
+        /* Caja de Broadcast */
+        .broadcast-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 15px;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.2);
+        }
+
+        .btn-broad {
+            background: var(--azul-bg);
+            color: var(--azul-texto);
+            border: 1px solid var(--azul-borde);
+            padding: 0 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .btn-broad:hover {
+            background: #e1efff;
+            border-color: #b3d4fc;
+        }
+
+        /* Tabla de Logs */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        th,
+        td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: #f8f9fa;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #fdfdfd;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .b-ok {
+            background: var(--verde-bg);
+            color: var(--verde-texto);
+            border: 1px solid var(--verde-borde);
+        }
+
+        .b-err {
+            background: var(--rojo-bg);
+            color: var(--rojo-texto);
+            border: 1px solid var(--rojo-borde);
+        }
+
+        .b-bro {
+            background: var(--naranja-bg);
+            color: var(--naranja-texto);
+            border: 1px solid var(--naranja-borde);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div>
+            <h1><i class='bx bx-radar' style="color: var(--azul-texto);"></i> Panel de Administración SRE</h1>
+            <p style="color: var(--text-muted); margin: 5px 0 0 0; font-size: 14px;">Gestor Activo de Topología
+                Jerárquica y Base de Datos D1</p>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            API WORKER ONLINE
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3><i class='bx bx-server' style="color: var(--text-muted);"></i> Controladores de Capas (Core/Dist)</h3>
+
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-cloud'></i> Capa de Núcleo (Cloudflare)</span>
+                <label class="switch"><input type="checkbox" id="SERVER_STATUS" onchange="toggle('SERVER_STATUS')"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-router'></i> Capa Distribución: Router 1</span>
+                <label class="switch"><input type="checkbox" id="ROUTER1_STATUS"
+                        onchange="toggle('ROUTER1_STATUS')"><span class="slider"></span></label>
+            </div>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-router'></i> Capa Distribución: Router 2</span>
+                <label class="switch"><input type="checkbox" id="ROUTER2_STATUS"
+                        onchange="toggle('ROUTER2_STATUS')"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class='bx bx-network-chart' style="color: var(--text-muted);"></i> Capa de Acceso (Terminales)</h3>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-desktop'></i> Subred A - Terminal 1</span>
+                <label class="switch"><input type="checkbox" id="PC1_STATUS" onchange="toggle('PC1_STATUS')"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-desktop'></i> Subred A - Terminal 2</span>
+                <label class="switch"><input type="checkbox" id="PC2_STATUS" onchange="toggle('PC2_STATUS')"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-desktop'></i> Subred B - Terminal 3</span>
+                <label class="switch"><input type="checkbox" id="PC3_STATUS" onchange="toggle('PC3_STATUS')"><span
+                        class="slider"></span></label>
+            </div>
+            <div class="device-row">
+                <span class="device-name"><i class='bx bx-desktop'></i> Subred B - Terminal 4</span>
+                <label class="switch"><input type="checkbox" id="PC4_STATUS" onchange="toggle('PC4_STATUS')"><span
+                        class="slider"></span></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 25px; border-left: 4px solid var(--azul-texto);">
+        <h3 style="border: none; margin-bottom: 5px;"><i class='bx bx-broadcast' style="color: var(--azul-texto);"></i>
+            Emisión de Broadcast Global</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Inyecta un paquete en la capa de núcleo que se
+            distribuirá en cascada hacia todos los nodos activos.</p>
+        <div class="broadcast-box">
+            <input type="text" id="broadMsg" placeholder="Escribe el payload de la alerta sistémica...">
+            <button class="btn-broad" onclick="enviarBroadcast()"><i class='bx bx-paper-plane'></i> ENVIAR
+                ALERTA</button>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nodo Origen</th>
+                <th>Timestamp (UTC)</th>
+                <th>Payload Interceptado</th>
+                <th>Resolución D1</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-logs"></tbody>
+    </table>
+
+    <script>
+        // ¡REEMPLAZA ESTO! (Asegúrate de NO dejar la / al final)
+        const MI_URL = "https://falling-flower-a247.mrluki4656.workers.dev";
+
+        async function syncSwitches() {
+            try {
+                const res = await fetch(`${MI_URL}/status`);
+                const config = await res.json();
+                Object.keys(config).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) el.checked = (config[key] === 'on');
+                });
+            } catch (e) { }
+        }
+
+        async function toggle(clave) {
+            const isChecked = document.getElementById(clave).checked;
+            const valor = isChecked ? 'on' : 'off';
+            await fetch(`${MI_URL}/admin/set?clave=${clave}&valor=${valor}`);
+            cargarLogs();
+        }
+
+        async function enviarBroadcast() {
+            const msg = document.getElementById('broadMsg').value;
+            if (!msg) return;
+            const res = await fetch(`${MI_URL}/admin/broadcast?msg=${encodeURIComponent(msg)}`);
+            const data = await res.json();
+            if (data.error) alert("⛔ ACCIÓN DENEGADA: " + data.error);
+            document.getElementById('broadMsg').value = '';
+            cargarLogs();
+        }
+
+        async function cargarLogs() {
+            try {
+                const res = await fetch(`${MI_URL}/logs`);
+                const logs = await res.json();
+                const tbody = document.getElementById('tabla-logs');
+                tbody.innerHTML = '';
+
+                logs.forEach(log => {
+                    let clase = log.estado.includes("ÉXITO") ? "b-ok" : (log.estado.includes("BROADCAST") ? "b-bro" : "b-err");
+                    let icon = log.estado.includes("ÉXITO") ? "bx-check-circle" : (log.estado.includes("BROADCAST") ? "bx-broadcast" : "bx-x-circle");
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="color: var(--text-muted);">#${log.id}</td>
+                            <td style="font-weight: 600;">${log.origen}</td>
+                            <td style="color: var(--text-muted); font-size: 12px;">${log.fecha}</td>
+                            <td>${log.paquete}</td>
+                            <td><span class="badge ${clase}"><i class='bx ${icon}'></i> ${log.estado}</span></td>
+                        </tr>
+                    `;
+                });
+            } catch (e) { }
+        }
+
+        syncSwitches();
+        setInterval(cargarLogs, 2000);
+        cargarLogs();
+    </script>
+    <script>
+        const token = localStorage.getItem("admin_token");
+        if (!token) {
+            const currentPath = window.location.pathname;
+            window.location.href = `/session/login/?redirect=${encodeURIComponent(currentPath)}`;
+        }
+        function cerrarSesion() {
+            localStorage.removeItem("admin_token");
+            localStorage.removeItem("admin_info");
+            window.location.href = "/session/login/";
+        }
+    </script>
+</body>
+
+</html>
